@@ -7,76 +7,121 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body, html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-      background-color: #000;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background-color: #000;
     }
 
     .video-container {
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-      scroll-snap-align: start;
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        scroll-snap-align: start;
     }
 
     video {
-      height: 100%;
-      width: auto;
-      max-width: 100%;
-      max-height: 100%;
-      background-color: #000;
+        height: 100%;
+        width: auto;
+        max-width: 100%;
+        max-height: 100%;
+        background-color: #000;
     }
 
     .videos-wrapper {
-      scroll-snap-type: y mandatory;
-      overflow-y: scroll;
-      height: 100vh;
+        scroll-snap-type: y mandatory;
+        overflow-y: scroll;
+        height: 100vh;
     }
 
-    /*Nav bar styling*/
+    /* Vertical nav bar */
+    .vertical-nav {
+        position: absolute;
+        right: 10px;
+        bottom: 20%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #fff;
+        gap: 20px;
+    }
+
+    .vertical-nav button {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .vertical-nav button span {
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    /* Bottom text overlay */
+    .text-overlay {
+        position: absolute;
+        bottom: 80px;
+        left: 20px;
+        color: #fff;
+        font-size: 16px;
+        line-height: 1.5;
+        z-index: 1;
+    }
+
+    .text-overlay .handle {
+        font-weight: bold;
+    }
+
+    .text-overlay .description {
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    /* Nav bar styling */
     .navbar {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      height: 60px;
-      background-color: #111;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      color: #fff;
-      z-index: 1000;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 60px;
+        background-color: #111;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        color: #fff;
+        z-index: 1000;
     }
 
     .navbar button {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      cursor: pointer;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
     }
 
     .navbar button:focus {
-      outline: none;
+        outline: none;
     }
   </style>
 </head>
 <body>
-
-    <!--Video conatiner-->
-    <div class="videos-wrapper" id="videosWrapper">
-    </div>
-
-  <!--Nav bar elements-->
+  <div class="videos-wrapper" id="videosWrapper"></div>
+  
+  <!--nav bar elements -->
   <div class="navbar">
     <button id="homeButton"><i class="fa-solid fa-house"></i><br></button>
     <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i><br></button>
@@ -86,48 +131,95 @@
   </div>
 
   <script>
-    //asset folder holds hand-selected videos
-    const videoFiles = ['assets/video1.mp4', 'assets/video2.mp4', 'assets/video3.mp4']; 
+    const videoData = [
+      { src: 'assets/video1.mp4', handle: '@<handle>', description: "<desc>"},
+      { src: 'assets/video2.mp4', handle: '@<handle>', description: "<desc>" },
+      { src: 'assets/video3.mp4', handle: '@<handle>', description: "<desc>" }
+    ];
+
     const videosWrapper = document.getElementById('videosWrapper');
 
-    //function to create video elements
-    function createVideoElement(src) {
-      const container = document.createElement('div');
-      container.className = 'video-container';
+    //function to create a video container with video, nav bar, and text overlay
+    function createVideoElement({ src, handle, description }) {
+        const container = document.createElement('div');
+        container.className = 'video-container';
 
-      const video = document.createElement('video');
-      video.src = src;
-      video.controls = false;
-      video.autoplay = false;
-      video.loop = true;
+        //create video element
+        const video = document.createElement('video');
+        video.src = src;
+        video.autoplay = true;
+        video.muted = true;
+        video.loop = true;
 
-      container.appendChild(video);
-      return container;
+        //create vertical nav bar for likes, comments, share
+        const navBar = document.createElement('div');
+        navBar.className = 'vertical-nav';
+      
+        const likeButton = document.createElement('button');
+        likeButton.innerHTML = '<i class="fa-solid fa-heart"></i><span>Like</span>';
+      
+        const commentButton = document.createElement('button');
+        commentButton.innerHTML = '<i class="fa-solid fa-comment"></i><span>Comment</span>';
+      
+        const shareButton = document.createElement('button');
+        shareButton.innerHTML = '<i class="fa-solid fa-share"></i><span>Share</span>';
+
+        const infoButton = document.createElement('button');
+        infoButton.innerHTML = '<i class="fa-solid fa-circle-info"></i><span>Info</span>';
+
+        //append buttons to nav bar
+        navBar.appendChild(likeButton);
+        navBar.appendChild(commentButton);
+        navBar.appendChild(shareButton);
+        navBar.appendChild(infoButton);
+
+        //create overlayed text box for handle and description
+        const textOverlay = document.createElement('div');
+        textOverlay.className = 'text-overlay';
+
+        const userHandle = document.createElement('div');
+        userHandle.className = 'handle';
+        userHandle.textContent = handle;
+
+        const videoDescription = document.createElement('div');
+        videoDescription.className = 'description';
+        videoDescription.textContent = description;
+
+        //append handle and description to text overlay
+        textOverlay.appendChild(userHandle);
+        textOverlay.appendChild(videoDescription);
+
+        //append video, nav bar, and text overlay to container
+        container.appendChild(video);
+        container.appendChild(navBar);
+        container.appendChild(textOverlay);
+
+        return container;
     }
 
-    //populate videosWrapper with video elements
-    videoFiles.forEach(src => {
-      const videoElement = createVideoElement(src);
-      videosWrapper.appendChild(videoElement);
+    //add each vid to videosWrapper container
+    videoData.forEach(videoInfo => {
+        const videoElement = createVideoElement(videoInfo);
+        videosWrapper.appendChild(videoElement);
     });
 
     //play, unmute, and pause videos based on visibility in scroll pattern
     const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        const video = entry.target.querySelector('video');
-        if (entry.isIntersecting) {
-          video.play();
-          video.muted = false; //unmute vid in view
-        } else {
-          video.pause();
-          video.muted = true; //mute video out of view
-        }
-      });
+        entries.forEach(entry => {
+            const video = entry.target.querySelector('video');
+            if (entry.isIntersecting) {
+                video.play();
+                video.muted = false; //unmute video in view
+            } else {
+                video.pause();
+                video.muted = true; //mute video out of view
+            }
+        });
     }, { threshold: 0.75 }); //threshold autoplay at 75% visibility
 
     //observe each video container
     document.querySelectorAll('.video-container').forEach(container => {
-      observer.observe(container);
+        observer.observe(container);
     });
   </script>
 </body>
