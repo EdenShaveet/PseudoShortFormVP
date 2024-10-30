@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pseudo Short-Form Video Platform</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+    }
+
+    .video-container {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      scroll-snap-align: start;
+    }
+
+    video {
+      height: 100%;
+      width: auto;
+      max-width: 100%;
+      max-height: 100%;
+      background-color: #000;
+    }
+
+    .videos-wrapper {
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      height: 100vh;
+    }
+
+    /*Nav bar styling*/
+    .navbar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #111;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      color: #fff;
+      z-index: 1000;
+    }
+
+    .navbar button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .navbar button:focus {
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+    <!--Video conatiner-->
+    <div class="videos-wrapper" id="videosWrapper">
+    </div>
+
+  <!--Nav bar elements-->
+  <div class="navbar">
+    <button id="homeButton">🏠<br></button>
+    <button id="searchButton">🔍<br></button>
+    <button id="addButton">➕<br></button>
+    <button id="notificationsButton">🔔<br></button>
+    <button id="profileButton">👤<br></button>
+  </div>
+
+  <script>
+    //asset folder holds hand-selected videos
+    const videoFiles = ['assets/video1.mp4', 'assets/video2.mp4', 'assets/video3.mp4']; 
+    const videosWrapper = document.getElementById('videosWrapper');
+
+    //function to create video elements
+    function createVideoElement(src) {
+      const container = document.createElement('div');
+      container.className = 'video-container';
+
+      const video = document.createElement('video');
+      video.src = src;
+      video.controls = false;
+      video.autoplay = false;
+      video.loop = true;
+
+      container.appendChild(video);
+      return container;
+    }
+
+    //populate videosWrapper with video elements
+    videoFiles.forEach(src => {
+      const videoElement = createVideoElement(src);
+      videosWrapper.appendChild(videoElement);
+    });
+
+    //play, unmute, and pause videos based on visibility in scroll pattern
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const video = entry.target.querySelector('video');
+        if (entry.isIntersecting) {
+          video.play();
+          video.muted = false; //unmute vid in view
+        } else {
+          video.pause();
+          video.muted = true; //mute video out of view
+        }
+      });
+    }, { threshold: 0.75 }); //threshold autoplay at 75% visibility
+
+    //observe each video container
+    document.querySelectorAll('.video-container').forEach(container => {
+      observer.observe(container);
+    });
+  </script>
+</body>
+</html>
