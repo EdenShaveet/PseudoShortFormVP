@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto-Scrolling Video Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background-color: #000;
+    }
+
+    .video-container {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        scroll-snap-align: start;
+    }
+
+    video {
+        height: 100%;
+        width: auto;
+        max-width: 100%;
+        max-height: 100%;
+        background-color: #000;
+    }
+
+    .videos-wrapper {
+        scroll-snap-type: y mandatory;
+        overflow-y: scroll;
+        height: 100vh;
+        scroll-behavior: smooth;
+    }
+
+    /* Vertical nav bar */
+    .vertical-nav {
+        position: absolute;
+        right: 10px;
+        bottom: 20%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #fff;
+        gap: 20px;
+    }
+
+    .vertical-nav button {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .vertical-nav button span {
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    /* Bottom text overlay */
+    .text-overlay {
+        position: absolute;
+        bottom: 80px;
+        left: 20px;
+        color: #fff;
+        font-size: 16px;
+        line-height: 1.5;
+        z-index: 1;
+    }
+
+    .text-overlay .handle {
+        font-weight: bold;
+    }
+
+    .text-overlay .description {
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    /* Nav bar styling */
+    .navbar {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 60px;
+        background-color: #111;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        color: #fff;
+        z-index: 1000;
+    }
+
+    .navbar button {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .navbar button:focus {
+        outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="videos-wrapper" id="videosWrapper"></div>
+  
+  <!--nav bar elements -->
+  <div class="navbar">
+    <button id="homeButton"><i class="fa-solid fa-house"></i><br></button>
+    <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i><br></button>
+    <button id="addButton"><i class="fa-solid fa-plus"></i><br></button>
+    <button id="notificationsButton"><i class="fa-solid fa-bell"></i><br></button>
+    <button id="profileButton"><i class="fa-solid fa-user"></i><br></button>
+  </div>
+
+  <script>
+    const videoData = [
+      { src: 'assets/video1.mp4', handle: '@user1', description: "Video 1 description" },
+      { src: 'assets/video2.mp4', handle: '@user2', description: "Video 2 description" },
+      { src: 'assets/video3.mp4', handle: '@user3', description: "Video 3 description" }
+    ];
+
+    const videosWrapper = document.getElementById('videosWrapper');
+
+    //Function to create a video container with video, nav bar, and text overlay
+    function createVideoElement({ src, handle, description }) {
+        const container = document.createElement('div');
+        container.className = 'video-container';
+
+        //Create video element
+        const video = document.createElement('video');
+        video.src = src;
+        video.autoplay = true;
+        video.muted = true;
+        video.loop = true;
+
+        //Create vertical nav bar for likes, comments, share
+        const navBar = document.createElement('div');
+        navBar.className = 'vertical-nav';
+
+        const likeButton = document.createElement('button');
+        likeButton.innerHTML = '<i class="fa-solid fa-heart"></i><span>Like</span>';
+
+        const commentButton = document.createElement('button');
+        commentButton.innerHTML = '<i class="fa-solid fa-comment"></i><span>Comment</span>';
+
+        const shareButton = document.createElement('button');
+        shareButton.innerHTML = '<i class="fa-solid fa-share"></i><span>Share</span>';
+
+        const infoButton = document.createElement('button');
+        infoButton.innerHTML = '<i class="fa-solid fa-circle-info"></i><span>Info</span>';
+
+        //Append buttons to nav bar
+        navBar.appendChild(likeButton);
+        navBar.appendChild(commentButton);
+        navBar.appendChild(shareButton);
+        navBar.appendChild(infoButton);
+
+        //Create overlayed text box for handle and description
+        const textOverlay = document.createElement('div');
+        textOverlay.className = 'text-overlay';
+
+        const userHandle = document.createElement('div');
+        userHandle.className = 'handle';
+        userHandle.textContent = handle;
+
+        const videoDescription = document.createElement('div');
+        videoDescription.className = 'description';
+        videoDescription.textContent = description;
+
+        //Append handle and description to text overlay
+        textOverlay.appendChild(userHandle);
+        textOverlay.appendChild(videoDescription);
+
+        //Append video, nav bar, and text overlay to container
+        container.appendChild(video);
+        container.appendChild(navBar);
+        container.appendChild(textOverlay);
+
+        return container;
+    }
+
+    //Add each video to videosWrapper container
+    videoData.forEach(videoInfo => {
+        const videoElement = createVideoElement(videoInfo);
+        videosWrapper.appendChild(videoElement);
+    });
+
+    //Auto-scroll function
+    let currentIndex = 0;
+    const videoContainers = document.querySelectorAll('.video-container');
+
+    function autoScroll() {
+        currentIndex = (currentIndex + 1) % videoContainers.length;
+        videoContainers[currentIndex].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    setInterval(autoScroll, 10000); //Auto-scroll every 10 seconds
+
+    //Play, unmute, and pause videos based on visibility in scroll pattern
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            const video = entry.target.querySelector('video');
+            if (entry.isIntersecting) {
+                video.play();
+                video.muted = false; //Unmute video in view
+            } else {
+                video.pause();
+                video.muted = true; //Mute video out of view
+            }
+        });
+    }, { threshold: 0.75 });
+
+    videoContainers.forEach(container => {
+        observer.observe(container);
+    });
+  </script>
+</body>
+</html>
