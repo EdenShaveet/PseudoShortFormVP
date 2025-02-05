@@ -15,7 +15,7 @@
     }
 
     /* Intro screen */
-    .intro-screen {
+    .intro-screen, .countdown-screen {
         position: fixed;
         top: 0;
         left: 0;
@@ -29,6 +29,11 @@
         font-size: 24px;
         text-align: center;
         z-index: 2000;
+    }
+
+    .countdown-screen {
+        font-size: 50px;
+        display: none; /* Initially hidden */
     }
 
     .video-container {
@@ -145,6 +150,11 @@
     Follow the white dot with your eyes.
   </div>
 
+  <!-- Countdown Screen -->
+  <div class="countdown-screen" id="countdownScreen">
+    3
+  </div>
+
   <!-- Videos Wrapper -->
   <div class="videos-wrapper" id="videosWrapper"></div>
 
@@ -166,6 +176,7 @@
 
     const videosWrapper = document.getElementById('videosWrapper');
     const introScreen = document.getElementById('introScreen');
+    const countdownScreen = document.getElementById('countdownScreen');
     const bottomNavbar = document.getElementById('bottomNavbar');
 
     //Function to create a video container with video, nav bar, and text overlay
@@ -232,25 +243,37 @@
         videosWrapper.appendChild(videoElement);
     });
 
-    //Hide intro screen and show videos after 5 seconds
-    setTimeout(() => {
-        introScreen.style.display = 'none';
-        videosWrapper.style.display = 'block';
-        bottomNavbar.style.display = 'flex';
-    }, 5000);
-
     //Auto-scroll functionality
     let currentIndex = 0;
-    const videoContainers = document.querySelectorAll('.video-container');
-
     function autoScroll() {
+        const videoContainers = document.querySelectorAll('.video-container');
+        if (videoContainers.length === 0) return;
+
         currentIndex = (currentIndex + 1) % videoContainers.length;
         videoContainers[currentIndex].scrollIntoView({ behavior: 'smooth' });
     }
 
+    //Transition sequence: Intro --> Countdown --> Videos
     setTimeout(() => {
-        setInterval(autoScroll, 10000);
-    }, 8000); //Start scrolling after intro
+        introScreen.style.display = 'none';
+        countdownScreen.style.display = 'flex';
+
+        let countdown = 3;
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                countdownScreen.textContent = countdown;
+            } else {
+                clearInterval(countdownInterval);
+                countdownScreen.style.display = 'none';
+                videosWrapper.style.display = 'block';
+                bottomNavbar.style.display = 'flex';
+
+                //Start auto-scrolling after videos are shown
+                setInterval(autoScroll, 10000);
+            }
+        }, 1000);
+    }, 5000); 
 
   </script>
 </body>
