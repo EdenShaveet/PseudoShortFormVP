@@ -14,8 +14,7 @@
         background-color: #000;
     }
 
-    /* Intro screen */
-    .intro-screen, .countdown-screen {
+    .intro-screen, .countdown-screen, .dot-screen {
         position: fixed;
         top: 0;
         left: 0;
@@ -33,7 +32,11 @@
 
     .countdown-screen {
         font-size: 50px;
-        display: none; /* Initially hidden */
+        display: none;
+    }
+
+    .dot-screen {
+        display: none;
     }
 
     .video-container {
@@ -61,10 +64,9 @@
         overflow-y: scroll;
         height: 100vh;
         scroll-behavior: smooth;
-        display: none; /* Initially hidden */
+        display: none;
     }
 
-    /* Vertical nav bar */
     .vertical-nav {
         position: absolute;
         right: 10px;
@@ -92,7 +94,6 @@
         margin-top: 4px;
     }
 
-    /* Bottom text overlay */
     .text-overlay {
         position: absolute;
         bottom: 80px;
@@ -112,7 +113,6 @@
         margin-top: 5px;
     }
 
-    /* Nav bar styling */
     .navbar {
         position: fixed;
         bottom: 0;
@@ -124,7 +124,7 @@
         align-items: center;
         color: #fff;
         z-index: 1000;
-        display: none; /* Initially hidden */
+        display: none;
     }
 
     .navbar button {
@@ -138,143 +138,177 @@
         cursor: pointer;
     }
 
-    .navbar button:focus {
-        outline: none;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Intro Screen -->
   <div class="intro-screen" id="introScreen">
     Follow the white dot with your eyes.
   </div>
 
-  <!-- Countdown Screen -->
-  <div class="countdown-screen" id="countdownScreen">
-    3
+  <div class="countdown-screen" id="countdownScreen">3</div>
+
+  <div class="dot-screen" id="dotScreen">
+    <canvas id="dotCanvas"></canvas>
   </div>
 
-  <!-- Videos Wrapper -->
   <div class="videos-wrapper" id="videosWrapper"></div>
 
-  <!-- Bottom Navbar -->
   <div class="navbar" id="bottomNavbar">
-    <button id="homeButton"><i class="fa-solid fa-house"></i><br></button>
-    <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i><br></button>
-    <button id="addButton"><i class="fa-solid fa-plus"></i><br></button>
-    <button id="notificationsButton"><i class="fa-solid fa-bell"></i><br></button>
-    <button id="profileButton"><i class="fa-solid fa-user"></i><br></button>
+    <button id="homeButton"><i class="fa-solid fa-house"></i></button>
+    <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <button id="addButton"><i class="fa-solid fa-plus"></i></button>
+    <button id="notificationsButton"><i class="fa-solid fa-bell"></i></button>
+    <button id="profileButton"><i class="fa-solid fa-user"></i></button>
   </div>
 
   <script>
     const videoData = [
-      { src: 'assets/video1.mp4', handle: '@user1', description: "Video 1 description" },
-      { src: 'assets/video2.mp4', handle: '@user2', description: "Video 2 description" },
-      { src: 'assets/video3.mp4', handle: '@user3', description: "Video 3 description" }
+        { src: 'assets/video1.mp4', handle: '@user1', description: "Video 1 description" },
+        { src: 'assets/video2.mp4', handle: '@user2', description: "Video 2 description" },
+        { src: 'assets/video3.mp4', handle: '@user3', description: "Video 3 description" }
     ];
 
     const videosWrapper = document.getElementById('videosWrapper');
     const introScreen = document.getElementById('introScreen');
     const countdownScreen = document.getElementById('countdownScreen');
+    const dotScreen = document.getElementById('dotScreen');
     const bottomNavbar = document.getElementById('bottomNavbar');
 
-    //Function to create a video container with video, nav bar, and text overlay
     function createVideoElement({ src, handle, description }) {
         const container = document.createElement('div');
         container.className = 'video-container';
 
-        //Create video element
         const video = document.createElement('video');
         video.src = src;
         video.autoplay = true;
         video.muted = true;
         video.loop = true;
 
-        //Create vertical nav bar for likes, comments, share
-        const navBar = document.createElement('div');
-        navBar.className = 'vertical-nav';
-
-        const likeButton = document.createElement('button');
-        likeButton.innerHTML = '<i class="fa-solid fa-heart"></i><span>Like</span>';
-
-        const commentButton = document.createElement('button');
-        commentButton.innerHTML = '<i class="fa-solid fa-comment"></i><span>Comment</span>';
-
-        const shareButton = document.createElement('button');
-        shareButton.innerHTML = '<i class="fa-solid fa-share"></i><span>Share</span>';
-
-        const infoButton = document.createElement('button');
-        infoButton.innerHTML = '<i class="fa-solid fa-circle-info"></i><span>Info</span>';
-
-        //Append buttons to nav bar
-        navBar.appendChild(likeButton);
-        navBar.appendChild(commentButton);
-        navBar.appendChild(shareButton);
-        navBar.appendChild(infoButton);
-
-        //Create overlayed text box for handle and description
         const textOverlay = document.createElement('div');
         textOverlay.className = 'text-overlay';
 
-        const userHandle = document.createElement('div');
-        userHandle.className = 'handle';
-        userHandle.textContent = handle;
+        textOverlay.innerHTML = `<div class="handle">${handle}</div>
+                                 <div class="description">${description}</div>`;
 
-        const videoDescription = document.createElement('div');
-        videoDescription.className = 'description';
-        videoDescription.textContent = description;
-
-        //Append handle and description to text overlay
-        textOverlay.appendChild(userHandle);
-        textOverlay.appendChild(videoDescription);
-
-        //Append video, nav bar, and text overlay to container
-        container.appendChild(video);
-        container.appendChild(navBar);
-        container.appendChild(textOverlay);
-
+        container.append(video, textOverlay);
         return container;
     }
 
-    //Add each video to videosWrapper container
     videoData.forEach(videoInfo => {
-        const videoElement = createVideoElement(videoInfo);
-        videosWrapper.appendChild(videoElement);
+        videosWrapper.appendChild(createVideoElement(videoInfo));
     });
 
-    //Auto-scroll functionality
     let currentIndex = 0;
     function autoScroll() {
         const videoContainers = document.querySelectorAll('.video-container');
-        if (videoContainers.length === 0) return;
-
         currentIndex = (currentIndex + 1) % videoContainers.length;
         videoContainers[currentIndex].scrollIntoView({ behavior: 'smooth' });
     }
 
-    //Transition sequence: Intro --> Countdown --> Videos
+    const dotCanvas = document.getElementById('dotCanvas');
+    const ctx = dotCanvas.getContext('2d');
+    dotCanvas.width = window.innerWidth;
+    dotCanvas.height = window.innerHeight;
+    
+    let x = 0, y = 0;
+    const radius = 20;
+    const speed = 5;
+    const pauseDuration = 500;
+    let direction = "right";
+    let cycleCount = 0;
+    
+    function drawCircle() {
+        ctx.clearRect(0, 0, dotCanvas.width, dotCanvas.height);
+        ctx.beginPath();
+        ctx.arc(x + radius, y + radius, radius, 0, Math.PI * 2);
+        ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function moveCircle() {
+        if (direction === "right") {
+            if (x + 2 * radius < dotCanvas.width) {
+                x += speed;
+            } else {
+                direction = "down"; //Move to lower-right
+                stopAtCorner();
+                return;
+            }
+        } else if (direction === "down") {
+            if (y + 2 * radius < dotCanvas.height) {
+                y += speed;
+            } else {
+                direction = "left"; //Move to lower-left
+                stopAtCorner();
+                return;
+            }
+        } else if (direction === "left") {
+            if (x > 0) {
+            x -= speed;
+            } else {
+                direction = "up"; //Move to upper-left
+                stopAtCorner();
+                return;
+            }
+        } else if (direction === "up") {
+            if (y > 0) {
+                y -= speed;
+            } else {
+                cycleCount++;
+                if (cycleCount < 2) {
+                    direction = "right"; //Restart cycle
+                    stopAtCorner();
+                    return;
+                } else {
+                    transitionToVideos(); //Transition after 2 cycles
+                    return;
+                }
+            }
+        }
+
+        drawCircle();
+        requestAnimationFrame(moveCircle);
+    }
+
+    function stopAtCorner() {
+        setTimeout(() => {
+            requestAnimationFrame(moveCircle);
+        }, pauseDuration);
+    }
+
+    //Transition from dot screen to videos
+    function transitionToVideos() {
+        dotScreen.style.display = 'none';
+        videosWrapper.style.display = 'block';
+        bottomNavbar.style.display = 'flex';
+        setInterval(autoScroll, 10000);
+    }
+
+    //Sequence: Intro --> Countdown --> Dot Animation → Videos
     setTimeout(() => {
         introScreen.style.display = 'none';
         countdownScreen.style.display = 'flex';
 
         let countdown = 3;
-        const countdownInterval = setInterval(() => {
+        const interval = setInterval(() => {
             countdown--;
             if (countdown > 0) {
                 countdownScreen.textContent = countdown;
             } else {
-                clearInterval(countdownInterval);
+                clearInterval(interval);
                 countdownScreen.style.display = 'none';
-                videosWrapper.style.display = 'block';
-                bottomNavbar.style.display = 'flex';
+                dotScreen.style.display = 'flex';
 
-                //Start auto-scrolling after videos are shown
-                setInterval(autoScroll, 10000);
+                //Start dot animation
+                drawCircle();
+                moveCircle();
             }
         }, 1000);
-    }, 5000); 
+    }, 5000);
 
   </script>
+
 </body>
 </html>
