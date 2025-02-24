@@ -185,13 +185,35 @@
         video.muted = true;
         video.loop = true;
 
+                //create vertical nav bar for likes, comments, share
+                const navBar = document.createElement('div');
+        navBar.className = 'vertical-nav';
+      
+        const likeButton = document.createElement('button');
+        likeButton.innerHTML = '<i class="fa-solid fa-heart"></i><span>Like</span>';
+      
+        const commentButton = document.createElement('button');
+        commentButton.innerHTML = '<i class="fa-solid fa-comment"></i><span>Comment</span>';
+      
+        const shareButton = document.createElement('button');
+        shareButton.innerHTML = '<i class="fa-solid fa-share"></i><span>Share</span>';
+
+        const infoButton = document.createElement('button');
+        infoButton.innerHTML = '<i class="fa-solid fa-circle-info"></i><span>Info</span>';
+
+        //append buttons to nav bar
+        navBar.appendChild(likeButton);
+        navBar.appendChild(commentButton);
+        navBar.appendChild(shareButton);
+        navBar.appendChild(infoButton);
+
         const textOverlay = document.createElement('div');
         textOverlay.className = 'text-overlay';
 
         textOverlay.innerHTML = `<div class="handle">${handle}</div>
                                  <div class="description">${description}</div>`;
 
-        container.append(video, textOverlay);
+        container.append(video, textOverlay, navBar);
         return container;
     }
 
