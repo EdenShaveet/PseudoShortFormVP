@@ -163,11 +163,24 @@
   </div>
 
   <script>
-    const videoData = [
-        { src: 'assets/video1.mp4', handle: '@user1', description: "Video 1 description" },
-        { src: 'assets/video2.mp4', handle: '@user2', description: "Video 2 description" },
-        { src: 'assets/video3.mp4', handle: '@user3', description: "Video 3 description" }
+    const videoList = [
+    "vid61", "vid6", "vid49", "vid41", "vid47", "vid72", "vid81", "vid64", "vid23",
+    "vid13", "vid60", "vid21", "vid79", "vid22", "vid51", "vid89", "vid75", "vid25",
+    "vid85", "vid46", "vid53", "vid83", "vid1", "vid54", "vid86", "vid28", "vid76",
+    "vid84", "vid42", "vid73", "vid82", "vid58", "vid55", "vid59", "vid71", "vid29",
+    "vid74", "vid36", "vid77", "vid20", "vid35", "vid68", "vid52", "vid33", "vid3",
+    "vid38", "vid80", "vid70", "vid62", "vid27", "vid37", "vid69", "vid87", "vid88"
     ];
+    
+    const handles = ["@userA", "@userB", "@userC"];
+    
+    const videoData = videoList.map((vid, index) => ({
+        src: `assets/${vid}.mp4`,
+        handle: handles[index % handles.length], //Rotating between placeholder handles. Will change
+        description: `Video ${index + 1} description` //Placeholder descriptions
+    }));
+        
+    console.log(videoData);
 
     const videosWrapper = document.getElementById('videosWrapper');
     const introScreen = document.getElementById('introScreen');
@@ -185,8 +198,8 @@
         video.muted = true;
         video.loop = true;
 
-                //create vertical nav bar for likes, comments, share
-                const navBar = document.createElement('div');
+        //create vertical nav bar for likes, comments, share
+        const navBar = document.createElement('div');
         navBar.className = 'vertical-nav';
       
         const likeButton = document.createElement('button');
@@ -305,7 +318,7 @@
         dotScreen.style.display = 'none';
         videosWrapper.style.display = 'block';
         bottomNavbar.style.display = 'flex';
-        setInterval(autoScroll, 10000);
+        setInterval(autoScroll, 5000);
     }
 
     //Sequence: Intro --> Countdown --> Dot Animation → Videos
